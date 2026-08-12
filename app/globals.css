@@ -1,0 +1,225 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-heading: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-lineage: var(--lineage);
+
+  /* Verdict ramp: one continuous cold -> warm gradient, not three buckets.
+     Cold = dead capital, warm = compounding. */
+  --color-verdict-test: var(--verdict-test);
+  --color-verdict-kill: var(--verdict-kill);
+  --color-verdict-surveiller: var(--verdict-surveiller);
+  --color-verdict-sous-marge: var(--verdict-sous-marge);
+  --color-verdict-garder: var(--verdict-garder);
+  --color-verdict-winner: var(--verdict-winner);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Light theme. Kept deliberately plain: this product is designed dark-first
+   and light exists for daylight/printing, not as a second design. */
+:root {
+  --radius: 0.375rem;
+
+  --background: oklch(0.985 0.002 250);
+  --foreground: oklch(0.17 0.012 250);
+  --surface: oklch(1 0 0);
+  --surface-raised: oklch(0.975 0.003 250);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.17 0.012 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.17 0.012 250);
+
+  --primary: oklch(0.52 0.196 344);
+  --primary-foreground: oklch(0.99 0.005 344);
+  --secondary: oklch(0.955 0.004 250);
+  --secondary-foreground: oklch(0.24 0.012 250);
+  --muted: oklch(0.955 0.004 250);
+  --muted-foreground: oklch(0.49 0.011 250);
+  --accent: oklch(0.945 0.006 250);
+  --accent-foreground: oklch(0.2 0.012 250);
+  --destructive: oklch(0.55 0.21 27);
+
+  --border: oklch(0.9 0.006 250);
+  --input: oklch(0.9 0.006 250);
+  --ring: oklch(0.52 0.196 344);
+  --lineage: oklch(0.78 0.01 250);
+
+  --verdict-test: oklch(0.55 0.008 250);
+  --verdict-kill: oklch(0.47 0.115 262);
+  --verdict-surveiller: oklch(0.5 0.11 224);
+  --verdict-sous-marge: oklch(0.5 0.1 196);
+  --verdict-garder: oklch(0.48 0.11 158);
+  --verdict-winner: oklch(0.52 0.13 92);
+
+  --chart-1: oklch(0.52 0.196 344);
+  --chart-2: oklch(0.5 0.11 224);
+  --chart-3: oklch(0.5 0.1 196);
+  --chart-4: oklch(0.48 0.11 158);
+  --chart-5: oklch(0.52 0.13 92);
+
+  --sidebar: oklch(0.97 0.003 250);
+  --sidebar-foreground: oklch(0.17 0.012 250);
+  --sidebar-primary: oklch(0.52 0.196 344);
+  --sidebar-primary-foreground: oklch(0.99 0.005 344);
+  --sidebar-accent: oklch(0.94 0.006 250);
+  --sidebar-accent-foreground: oklch(0.2 0.012 250);
+  --sidebar-border: oklch(0.9 0.006 250);
+  --sidebar-ring: oklch(0.52 0.196 344);
+}
+
+/* Dark is the default working theme. Cold, near-monochrome, almost silent:
+   colour appears only on verdicts and the single accent. */
+.dark {
+  --background: oklch(0.155 0.011 258);
+  --foreground: oklch(0.95 0.004 250);
+  --surface: oklch(0.194 0.012 258);
+  --surface-raised: oklch(0.232 0.013 258);
+
+  --card: oklch(0.194 0.012 258);
+  --card-foreground: oklch(0.95 0.004 250);
+  --popover: oklch(0.21 0.013 258);
+  --popover-foreground: oklch(0.95 0.004 250);
+
+  --primary: oklch(0.635 0.196 344);
+  --primary-foreground: oklch(0.145 0.02 344);
+  --secondary: oklch(0.255 0.013 258);
+  --secondary-foreground: oklch(0.95 0.004 250);
+  --muted: oklch(0.245 0.012 258);
+  --muted-foreground: oklch(0.655 0.012 252);
+  --accent: oklch(0.27 0.014 258);
+  --accent-foreground: oklch(0.96 0.004 250);
+  --destructive: oklch(0.68 0.19 25);
+
+  --border: oklch(0.98 0.01 258 / 11%);
+  --input: oklch(0.98 0.01 258 / 15%);
+  --ring: oklch(0.635 0.196 344);
+  --lineage: oklch(0.42 0.016 258);
+
+  --verdict-test: oklch(0.56 0.009 252);
+  --verdict-kill: oklch(0.6 0.09 262);
+  --verdict-surveiller: oklch(0.66 0.089 224);
+  --verdict-sous-marge: oklch(0.72 0.092 196);
+  --verdict-garder: oklch(0.78 0.107 158);
+  --verdict-winner: oklch(0.85 0.132 92);
+
+  --chart-1: oklch(0.635 0.196 344);
+  --chart-2: oklch(0.66 0.089 224);
+  --chart-3: oklch(0.72 0.092 196);
+  --chart-4: oklch(0.78 0.107 158);
+  --chart-5: oklch(0.85 0.132 92);
+
+  --sidebar: oklch(0.178 0.012 258);
+  --sidebar-foreground: oklch(0.93 0.004 250);
+  --sidebar-primary: oklch(0.635 0.196 344);
+  --sidebar-primary-foreground: oklch(0.145 0.02 344);
+  --sidebar-accent: oklch(0.255 0.013 258);
+  --sidebar-accent-foreground: oklch(0.96 0.004 250);
+  --sidebar-border: oklch(0.98 0.01 258 / 10%);
+  --sidebar-ring: oklch(0.635 0.196 344);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv11", "ss01";
+  }
+  html {
+    @apply font-sans;
+  }
+
+  /* Every figure in this product is compared against another figure in the
+     column above it, so all numerics are tabular by default. */
+  table,
+  input[type="number"] {
+    font-variant-numeric: tabular-nums;
+  }
+
+}
+
+@layer components {
+  /* The one place numbers live: monospace, tabular, tight. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+
+  /* Hierarchical creative codes (C01.2.1) and week codes (26W33). */
+  .code {
+    font-family: var(--font-mono);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* One dependable focus treatment for the whole app.
+   Deliberately unlayered: Tailwind's `utilities` layer beats anything in
+   `@layer base`, so a focus rule written there loses to the components' own
+   `outline-none`. shadcn's default ring is `ring-ring/50`, whose color-mix
+   resolves to a fully transparent shadow in some engines — an outline always
+   paints, so this is the treatment the whole app relies on. */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

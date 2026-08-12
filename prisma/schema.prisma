@@ -1,0 +1,374 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ---------------------------------------------------------------------------
+// Enums — closed vocabulary. Never widen these with a free-text escape hatch;
+// add a value here and to lib/taxonomy.ts instead.
+// ---------------------------------------------------------------------------
+
+enum CreativeKind {
+  VIDEO
+  STATIC
+}
+
+enum CreativeStatus {
+  BACKLOG
+  LIVE
+  PAUSE
+  WINNER
+  KILL
+}
+
+enum Angle {
+  Organisation
+  Innovation
+  Famille
+  AstuceFraicheur
+  AntiMachineTable
+  Decouverte
+  Fraicheur
+  OffreRisqueZero
+}
+
+enum VideoFormat {
+  Testimonial
+  DemoFAQ
+  Storytelling
+  Benefices
+  Comparatif
+  UGCCourt
+  StaticDemo
+  StaticOffer
+  UGCScreen
+}
+
+enum Layout {
+  L01
+  L02
+  L03
+  L04
+  L05
+  L06
+  L07
+  L08
+  L09
+  L10
+}
+
+enum VisualId {
+  V01
+  V02
+  V03
+  V04
+  V05
+  V06
+  V07
+  V08
+  V09
+  V10
+  V11
+  V12
+}
+
+// Union of the video and static changed-element vocabularies. The allowed
+// subset per Creative.kind is enforced in lib/taxonomy.ts + zod, not by the
+// database.
+enum ChangedElement {
+  ORIGINE
+  HOOK
+  ANGLE
+  FORMAT
+  ACTEUR
+  LIEU
+  MONTAGE
+  DUREE
+  PREUVE
+  CTA
+  OFFRE
+  MUSIQUE
+  HEADLINE
+  VISUEL
+  LAYOUT
+  COULEUR
+  BADGE
+}
+
+enum AccrocheKind {
+  HOOK
+  HEADLINE
+}
+
+// Shared between video hooks and static headlines — deliberate, it is what
+// makes the two formats comparable on the Scoreboard.
+enum AccrocheType {
+  Question
+  ChocVisuel
+  Negatif
+  Chiffre
+  Callout
+  AvantApres
+  Autorite
+  Curiosite
+  Demo
+}
+
+enum AccrocheStatus {
+  A_TESTER
+  EN_TEST
+  VALIDE
+  MORT
+}
+
+enum Period {
+  Rebajas_Enero
+  San_Valentin
+  Primavera
+  Semana_Santa
+  Dia_de_la_Madre
+  Pre_Verano
+  Rebajas_Verano
+  Agosto_Vacaciones
+  Vuelta_al_Cole
+  Otono
+  Black_Friday
+  Navidad
+}
+
+enum Verdict {
+  TEST_EN_COURS
+  KILL
+  SURVEILLER
+  SOUS_MARGE
+  GARDER
+  WINNER
+}
+
+enum ProductionType {
+  ITERATION_MAJEURE
+  ITERATION_MINEURE
+  NEW_CONCEPT
+}
+
+enum ProdStatus {
+  A_ECRIRE
+  SCRIPT_OK
+  TOURNAGE
+  MONTAGE
+  PRET
+  LANCE
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model Creative {
+  id             String          @id @default(cuid())
+  code           String          @unique
+  kind           CreativeKind
+  parentCode     String?
+  parent         Creative?       @relation("Lineage", fields: [parentCode], references: [code], onDelete: NoAction, onUpdate: NoAction)
+  children       Creative[]      @relation("Lineage")
+  generation     Int             @default(0)
+  changedElement ChangedElement?
+  angle          Angle
+  videoFormat    VideoFormat?
+  layout         Layout?
+  accrocheId     String?
+  accroche       Accroche?       @relation(fields: [accrocheId], references: [id])
+  durationS      Int?
+  visualId       VisualId?
+  launchDate     DateTime
+  period         Period
+  legacyMetaName String?
+  videoUrl       String?
+  scriptUrl      String?
+  hook3sUrl      String?
+  imageUrl       String?
+  briefUrl       String?
+  status         CreativeStatus  @default(BACKLOG)
+
+  weeklyPerfs WeeklyPerf[]
+  script      Script?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([kind])
+  @@index([status])
+  @@index([period])
+  @@index([angle])
+  @@index([accrocheId])
+  @@index([parentCode])
+}
+
+model Accroche {
+  id         String         @id @default(cuid())
+  code       String         @unique
+  kind       AccrocheKind
+  verbatim   String
+  type       AccrocheType
+  deepDesire String?
+  previewUrl String?
+  status     AccrocheStatus @default(A_TESTER)
+
+  creatives Creative[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([kind])
+  @@index([type])
+}
+
+// One row = one creative x one ISO week. "26W00" is the reserved code for
+// migrated cumulative history — excluded from weekly charts, counted in totals.
+model WeeklyPerf {
+  id             String   @id @default(cuid())
+  creativeId     String
+  creative       Creative @relation(fields: [creativeId], references: [id], onDelete: Cascade)
+  isoWeek        String
+  startDate      DateTime
+  endDate        DateTime
+  spend          Float
+  impressions    Int
+  views3s        Int?
+  thruplays      Int?
+  outboundClicks Int
+  lpViews        Int
+  atc            Int
+  checkouts      Int
+  purchases      Int
+  revenue        Float
+  note           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([creativeId, isoWeek])
+  @@index([isoWeek])
+}
+
+// Only one Offer may have isActive = true at a time; enforced in the server
+// action that switches offers, inside a transaction.
+model Offer {
+  id           String  @id @default(cuid())
+  name         String
+  isActive     Boolean @default(false)
+  psp          Float
+  vat          Float
+  otherFees    Float
+  minMargin    Float
+  targetMargin Float
+
+  lines OfferLine[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OfferLine {
+  id         String @id @default(cuid())
+  offerId    String
+  offer      Offer  @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  bundle     Int
+  cogs       Float
+  price      Float
+  salesShare Float
+  position   Int    @default(0)
+
+  @@index([offerId])
+}
+
+model BacklogItem {
+  id              String         @id @default(cuid())
+  priority        Int            @default(0)
+  creativeKind    CreativeKind
+  productionType  ProductionType
+  parentCode      String?
+  targetCode      String?
+  elementToChange ChangedElement
+  hypothesis      String
+  targetPeriod    Period
+  prodStatus      ProdStatus     @default(A_ECRIRE)
+  targetWeek      String?
+  briefUrl        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([prodStatus])
+  @@index([targetPeriod])
+}
+
+model ScriptFamily {
+  code               String @id
+  nickname           String
+  promise            String
+  visibleMechanism   String
+  narrativeStructure String
+  competitiveFrame   String
+  emotionalDriver    String
+  neverTouch         String
+
+  scripts Script[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Script {
+  id              String       @id @default(cuid())
+  creativeCode    String       @unique
+  creative        Creative?    @relation(fields: [creativeCode], references: [code], onDelete: Cascade, onUpdate: Cascade)
+  familyCode      String
+  family          ScriptFamily @relation(fields: [familyCode], references: [code], onDelete: Cascade)
+  hypothesis      String
+  changedVsParent Json?
+  hookVisual      String?
+  hookDialogue    String?
+  hookScreenText  String?
+  hookType        AccrocheType?
+  scenes          Json
+  learning        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([familyCode])
+}
+
+model SimulationScenario {
+  id                String @id @default(cuid())
+  name              String
+  budget            Float
+  cpm               Float
+  ctr               Float
+  clickToVisitDrop  Float
+  cvr               Float
+  averageOrderValue Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Seeded reference + editable state for the 12 Spanish commercial windows.
+// §5.7 requires persisted memo + relaunch toggle per period, so it needs a row.
+model CommercialPeriod {
+  code              Period  @id
+  orderIndex        Int
+  startWeek         Int
+  endWeek           Int
+  consumerTension   String
+  recommendedAngle  Angle
+  recommendedFormat String
+  recommendedLayout Layout
+  memo              String?
+  relaunchNextYear  Boolean @default(false)
+}
