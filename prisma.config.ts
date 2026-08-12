@@ -11,5 +11,8 @@ export default defineConfig({
   },
   datasource: {
     url: process.env["DATABASE_URL"],
+    // Supabase's pooled connection cannot host the shadow database that
+    // `migrate dev` needs; point this at a direct connection.
+    shadowDatabaseUrl: process.env["SHADOW_DATABASE_URL"],
   },
 });

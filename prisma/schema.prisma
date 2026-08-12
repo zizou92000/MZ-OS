@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 // ---------------------------------------------------------------------------
@@ -255,8 +255,10 @@ model WeeklyPerf {
   @@index([isoWeek])
 }
 
-// Only one Offer may have isActive = true at a time; enforced in the server
-// action that switches offers, inside a transaction.
+// Only one Offer may have isActive = true at a time. Enforced by a partial
+// unique index (see migration `single_active_offer`), not merely by the
+// transaction in activateOffer() — Prisma cannot express partial indexes in
+// the schema, so the constraint lives in SQL and must survive schema edits.
 model Offer {
   id           String  @id @default(cuid())
   name         String

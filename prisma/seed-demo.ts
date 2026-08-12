@@ -3,14 +3,15 @@
  *   npx tsx prisma/seed-demo.ts          seed
  *   npx tsx prisma/seed-demo.ts --clear  remove only the demo rows
  */
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+// Run directly with tsx, so it must load .env itself — unlike prisma/seed.ts,
+// which the Prisma CLI runs after loading prisma.config.ts.
+import "dotenv/config";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../lib/generated/prisma/client";
 import { isoWeekRange, isoWeekToDate, toIsoWeek } from "../lib/derive";
 
 const prisma = new PrismaClient({
-  adapter: new PrismaBetterSqlite3({
-    url: process.env.DATABASE_URL ?? "file:./dev.db",
-  }),
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }),
 });
 
 const HOOKS = [

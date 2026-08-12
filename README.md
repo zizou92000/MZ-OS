@@ -23,12 +23,48 @@ Pour la rendre permanente, ajoute cette ligne à `~/.zshrc` (je n'ai pas modifi�
 ton profil). Si tu installes Node autrement (nvm, Homebrew), le dossier
 `~/.mzos-tools` peut être supprimé.
 
+### Base de données — Supabase (Postgres)
+
+Copie `.env.example` en `.env` et renseigne les deux chaînes depuis
+**Supabase → Project Settings → Database → Connection string** :
+
+- `DATABASE_URL` : le *Transaction pooler* (port 6543), avec
+  `?pgbouncer=true&connection_limit=1`. Sans `pgbouncer=true`, Prisma tente des
+  prepared statements que le pooler ne sait pas tenir.
+- `SHADOW_DATABASE_URL` : la connexion *Direct* (port 5432). Utilisée seulement
+  par `prisma migrate dev`, qui doit créer puis détruire une base temporaire —
+  impossible à travers le pooler.
+
 ```bash
 npm install
-npx prisma migrate dev     # crée dev.db et applique le schéma
+npx prisma migrate deploy  # applique les migrations sur Supabase
 npm run db:seed            # 12 périodes commerciales + les 3 offres de référence
 npm run dev                # http://localhost:3000
 ```
+
+`migrate deploy` applique les migrations existantes sans en générer : c'est la
+commande à utiliser contre une base distante. `migrate dev` ne sert qu'en
+développement, quand tu modifies le schéma.
+
+<details>
+<summary>Travailler hors ligne, sans Supabase</summary>
+
+Un Postgres autonome (sans Docker ni sudo) peut être posé via npm :
+
+```bash
+npm install --prefix ~/.mzos-tools embedded-postgres
+PGBIN=~/.mzos-tools/node_modules/@embedded-postgres/darwin-arm64/native/bin
+$PGBIN/pg_ctl -D ~/.mzos-tools/pgdata -l ~/.mzos-tools/pg.log -o "-p 55432 -k /tmp" start
+```
+
+puis dans `.env` :
+
+```
+DATABASE_URL="postgresql://olen:olen@127.0.0.1:55432/olen_dev"
+SHADOW_DATABASE_URL="postgresql://olen:olen@127.0.0.1:55432/olen_shadow"
+```
+
+</details>
 
 Jeu de démonstration facultatif (19 créatives, 14 accroches, 35 semaines) :
 
@@ -45,7 +81,8 @@ npx tsx prisma/seed-demo.ts --clear    # retirer
 | `npm run build` / `npm start` | build et exécution en production |
 | `npm test` | tests unitaires (94) |
 | `npm run typecheck` | TypeScript strict, sans émission |
-| `npm run db:migrate` | créer et appliquer une migration |
+| `npm run db:migrate` | créer une migration (développement, base directe) |
+| `npm run db:deploy` | appliquer les migrations existantes (Supabase) |
 | `npm run db:seed` | données de départ |
 | `npm run db:studio` | inspecter la base |
 
@@ -119,6 +156,18 @@ prisma/              schéma, migrations, seeds
 dossier sous `app/(os)/`. Rien d'autre : la sidebar, le fil d'ariane et ⌘K le
 prennent en compte automatiquement.
 
+### Ce que la base impose elle-même
+
+Deux invariants ne dépendent pas du code applicatif :
+
+- **Le vocabulaire fermé est un type Postgres.** Les 14 énumérations
+  (`Angle`, `Verdict`, `AccrocheType`…) sont des `CREATE TYPE … AS ENUM`. Une
+  valeur hors vocabulaire est rejetée par la base, pas seulement par zod —
+  c'est ce qui garantit que les agrégations du Scoreboard restent justes.
+- **Une seule offre active à la fois**, via un index unique partiel
+  (`WHERE isActive = true`). La règle tient quelle que soit la voie d'écriture,
+  y compris un `UPDATE` manuel en SQL.
+
 ---
 
 ## Décisions qui ne sont pas négociables dans le code
@@ -184,6 +233,12 @@ verbatim ; le collage d'un export Meta brut remplit la grille ; le changement
 d'offre annonce puis applique exactement le même nombre de reclassements ;
 84 éléments focusables ont tous un indicateur visible ; aucun défilement
 horizontal au niveau de la page à 900 px.
+
+Vérifié contre un vrai Postgres : les migrations s'appliquent, les deux seeds
+passent, les trois offres de référence donnent les mêmes seuils relus depuis la
+base, une valeur d'enum hors vocabulaire est rejetée (`22P02`), un `UPDATE`
+tentant d'activer deux offres est rejeté par l'index partiel, et les colonnes
+`jsonb` (`scenes`, `changedVsParent`) se relisent en objets typés.
 
 ---
 
