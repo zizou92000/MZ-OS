@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { LEGACY_WEEK } from "@/lib/derive";
 import { prisma } from "@/lib/prisma";
-import { normaliseVerbatim } from "@/lib/text";
+import { normaliseVerbatim, pickCanonical } from "@/lib/text";
 import {
   ACCROCHE_TYPES,
   ANGLES,
@@ -47,12 +47,14 @@ export async function groupVerbatims(
       return Number.isFinite(n) && n > max ? n : max;
     }, 0) + 1;
 
-  return [...groups.values()].map((variants) => ({
-    // Keep the longest spelling: it usually has the accents and punctuation.
-    canonical: variants.reduce((a, b) => (b.length > a.length ? b : a)),
-    duplicates: variants.slice(1),
-    suggestedCode: `${prefix}${String(next++).padStart(2, "0")}`,
-  }));
+  return [...groups.values()].map((variants) => {
+    const canonical = pickCanonical(variants);
+    return {
+      canonical,
+      duplicates: variants.filter((v) => v !== canonical),
+      suggestedCode: `${prefix}${String(next++).padStart(2, "0")}`,
+    };
+  });
 }
 
 const accrocheImport = z.object({

@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { normaliseVerbatim } from "./text";
+import { normaliseVerbatim, pickCanonical } from "./text";
+
+describe("pickCanonical", () => {
+  it("prefers the spelling that kept its accents and punctuation", () => {
+    expect(
+      pickCanonical(["Sabes cuanto tiras", "¿Sabes cuánto tiras?"]),
+    ).toBe("¿Sabes cuánto tiras?");
+  });
+
+  it("never lets an all-caps variant win on a tie, whatever its position", () => {
+    const proper = "¿Sabes cuánto tiras a la basura?";
+    const shouty = "¿SABES CUÁNTO TIRAS A LA BASURA?";
+    expect(pickCanonical([shouty, proper])).toBe(proper);
+    expect(pickCanonical([proper, shouty])).toBe(proper);
+  });
+
+  it("returns the only variant when there is one", () => {
+    expect(pickCanonical(["Adiós bolsas"])).toBe("Adiós bolsas");
+  });
+});
 
 describe("normaliseVerbatim", () => {
   it("collapses case differences", () => {
