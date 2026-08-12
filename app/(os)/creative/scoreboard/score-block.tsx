@@ -53,7 +53,7 @@ export function ScoreBlock({
           </p>
         ) : (
           <>
-            <Table>
+            <Table className="min-w-[34rem]">
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="h-7 text-[11px]">Valeur</TableHead>

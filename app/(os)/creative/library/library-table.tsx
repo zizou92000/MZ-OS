@@ -387,11 +387,11 @@ function TreeView({
 
   return (
     <Card className="overflow-hidden py-0">
-      <Table>
+      <Table className="min-w-[46rem]">
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="h-8 w-8" />
-            <TableHead className="h-8 text-[11px]">Lignée</TableHead>
+            <TableHead className="hidden h-8 w-8 sm:table-cell" />
+            <TableHead className="sticky left-0 z-20 bg-card h-8 text-[11px]">Lignée</TableHead>
             <TableHead className="h-8 text-[11px]">Angle</TableHead>
             <TableHead className="h-8 text-[11px]">Format</TableHead>
             <TableHead className="h-8 text-[11px]">Accroche</TableHead>
@@ -403,7 +403,7 @@ function TreeView({
         <TableBody>
           {tree.map((node) => (
             <TableRow key={node.item.id} className="group">
-              <TableCell className="py-1 pr-0">
+              <TableCell className="hidden py-1 pr-0 sm:table-cell">
                 <Checkbox
                   checked={selected.has(node.item.id)}
                   onCheckedChange={() => onToggle(node.item.id)}
@@ -411,7 +411,9 @@ function TreeView({
                   className="size-3.5"
                 />
               </TableCell>
-              <TableCell className="py-1">
+              {/* Le code reste visible pendant le défilement horizontal :
+                  sans lui, un ROAS et un verdict n'appartiennent à personne. */}
+              <TableCell className="bg-card sticky left-0 z-20 py-1">
                 <div className="flex items-center">
                   <LineageThread
                     depth={node.depth}
@@ -563,11 +565,11 @@ function FlatView({
 
   return (
     <Card className="overflow-hidden py-0">
-      <Table>
+      <Table className="min-w-[46rem]">
         <TableHeader>
           {table.getHeaderGroups().map((group) => (
             <TableRow key={group.id} className="hover:bg-transparent">
-              <TableHead className="h-8 w-8" />
+              <TableHead className="hidden h-8 w-8 sm:table-cell" />
               {group.headers.map((header) => {
                 const dir = header.column.getIsSorted();
                 return (
@@ -604,7 +606,7 @@ function FlatView({
         <TableBody>
           {table.getRowModel().rows.map((row) => (
             <TableRow key={row.id}>
-              <TableCell className="py-1 pr-0">
+              <TableCell className="hidden py-1 pr-0 sm:table-cell">
                 <Checkbox
                   checked={selected.has(row.original.id)}
                   onCheckedChange={() => onToggle(row.original.id)}

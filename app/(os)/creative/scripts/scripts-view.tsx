@@ -285,7 +285,7 @@ function ScriptDetail({
       <Card className="gap-0 py-3">
         <CardContent className="px-4">
           <div className="mb-2 text-xs font-medium">Plans</div>
-          <Table>
+          <Table className="min-w-[36rem]">
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="h-7 w-20 text-[11px]">TC</TableHead>

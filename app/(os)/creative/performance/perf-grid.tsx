@@ -274,10 +274,10 @@ export function PerfGrid({
       )}
 
       <Card className="overflow-x-auto py-0">
-        <Table>
+        <Table className="min-w-[68rem]">
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead className="h-8 min-w-32 text-[11px]">Créative</TableHead>
+              <TableHead className="sticky left-0 z-20 bg-card h-8 min-w-32 text-[11px]">Créative</TableHead>
               {COLUMNS.map((c) => (
                 <TableHead
                   key={c.key}
@@ -316,7 +316,7 @@ export function PerfGrid({
 
               return (
                 <TableRow key={creative.id}>
-                  <TableCell className="py-0.5">
+                  <TableCell className="sticky left-0 z-20 bg-card py-0.5">
                     <div className="flex items-center gap-1.5">
                       <span className="code text-xs font-medium">
                         {creative.code}
